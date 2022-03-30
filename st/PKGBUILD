@@ -24,7 +24,7 @@ build() {
 
 	for patch in "${_patches[@]}"; do
 		echo "Applying patch $(basename $patch)..."
-		git apply "$srcdir/$(basename $patch)"
+		patch -i "$srcdir/$(basename $patch)"
 	done
 
 	make X11INC=/usr/include/X11 X11LIB=/usr/lib/X11
@@ -36,7 +36,7 @@ build() {
 	line=$(awk '/unsigned int defaultbg = /{ print NR; exit }' $conf)
 	sed -i "${line} c\unsigned int defaultbg = 235;" $conf
 
-	cat "$srcdir/$_pkgname-$pkgver/config.h"
+	#cat $conf
 }
 
 package() {
