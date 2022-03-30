@@ -1,0 +1,48 @@
+pkgname=st-chillpert
+_pkgname=st
+pkgver=0.8.5
+pkgrel=1
+pkgdesc="Modified version of st with scrolling and Xresource patches."
+arch=(x86_64)
+license=('MIT')
+groups=()
+provides=(st)
+conflicts=(st)
+noextract=()
+url="http://st.suckless.org"
+sha256sums=('ea6832203ed02ff74182bcb8adaa9ec454c8f989e79232cb859665e2f544ab37'
+            '5be9b40d2b51761685f6503e92028a7858cc6571a8867b88612fce8a70514d5b'
+            '19d8f4e7fd0d1933dc6fcf6c7333db08e1b40fc75795464660c4d723eb62511c')
+
+_patches=('https://st.suckless.org/patches/xresources/st-xresources-20200604-9ba7ecf.diff'
+		  'https://st.suckless.org/patches/scrollback/st-scrollback-20210507-4536f46.diff')
+source=(https://dl.suckless.org/$_pkgname/$_pkgname-$pkgver.tar.gz
+		"${_patches[@]}")
+
+build() {
+	cd "$srcdir/$_pkgname-$pkgver"
+
+	for patch in "${_patches[@]}"; do
+		echo "Applying patch $(basename $patch)..."
+		git apply "$srcdir/$(basename $patch)"
+	done
+
+	make X11INC=/usr/include/X11 X11LIB=/usr/lib/X11
+	
+	conf="$srcdir/$_pkgname-$pkgver/config.h"
+	line=$(awk '/static char \*font/{ print NR; exit }' $conf)
+	sed -i "${line} c\static char *font = \"MesloLGS NF:pixelsize=14:antialias=true:autohint=true\";" "$conf"
+
+	line=$(awk '/unsigned int defaultbg = /{ print NR; exit }' $conf)
+	sed -i "${line} c\unsigned int defaultbg = 235;" $conf
+
+	cat "$srcdir/$_pkgname-$pkgver/config.h"
+}
+
+package() {
+	cd "$srcdir/$_pkgname-$pkgver"
+
+	make PREFIX=/usr DESTDIR="${pkgdir}" install
+	install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
+	install -Dm644 README "${pkgdir}/usr/share/doc/${_pkgname}/README"
+}
