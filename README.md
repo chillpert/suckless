@@ -2,6 +2,6 @@
 
 **Patches**
 - [scrollback](https://st.suckless.org/patches/scrollback/)
-- [Xresource](https://st.suckless.org/patches/xresources/)
+- [Xresources](https://st.suckless.org/patches/xresources/)
 
 
